@@ -3,8 +3,10 @@ package bus;
 import bus.events.*;
 import bus.values.*;
 import co.com.sofka.domain.generic.AggregateEvent;
+import co.com.sofka.domain.generic.DomainEvent;
 import pasajero.values.PasajeroId;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -29,11 +31,17 @@ public class Bus extends AggregateEvent<BusId> {
         subscribe(new BusChange(this));
     }
 
+    public static Bus from(BusId busId, List<DomainEvent> events){
+        var bus = new Bus(busId);
+        events.forEach(bus::applyEvent);
+        return bus;
+    }
+
     public void asignarConductor(ConductorId entityId, NombreConductor nombreConductor, LicenciaConducir licenciaConducir){
         Objects.requireNonNull(entityId);
         Objects.requireNonNull(nombreConductor);
         Objects.requireNonNull(licenciaConducir);
-        appendChange(new ConductorAsignado(nombreConductor, licenciaConducir)).apply();
+        appendChange(new ConductorAsignado(entityId, nombreConductor, licenciaConducir)).apply();
     }
 
     public void agregarPasajero(PasajeroId pasajeroId){
@@ -45,7 +53,7 @@ public class Bus extends AggregateEvent<BusId> {
         Objects.requireNonNull(entityId);
         Objects.requireNonNull(posicionInicial);
         Objects.requireNonNull(posicionFinal);
-        appendChange(new RutaAsignada(posicionInicial, posicionFinal)).apply();
+        appendChange(new RutaAsignada(entityId, posicionInicial, posicionFinal)).apply();
     }
 
     public void actualizarNumeroAsientos(NumeroAsientos numeroAsientos){
@@ -68,21 +76,23 @@ public class Bus extends AggregateEvent<BusId> {
         appendChange(new TipoBusActualizado(tipo)).apply();
     }
 
-    public void cambiarConductor(ConductorId conductorId){
+    public void cambiarConductor(ConductorId conductorId, NombreConductor nombreConductor){
         Objects.requireNonNull(conductorId);
-        appendChange(new ConductorCambiado(conductorId)).apply();
+        Objects.requireNonNull(nombreConductor);
+        appendChange(new ConductorCambiado(conductorId, nombreConductor)).apply();
     }
 
-    public void verificarLicenciaConductor(LicenciaConducir licenciaConducir){
+    public void verificarLicenciaConductor(ConductorId conductorId, LicenciaConducir licenciaConducir){
+        Objects.requireNonNull(conductorId);
         Objects.requireNonNull(licenciaConducir);
-        appendChange(new LicenciaConductorVerificada(licenciaConducir)).apply();
+        appendChange(new LicenciaConductorVerificada(conductorId, licenciaConducir)).apply();
     }
 
     public void actualizarRuta(RutaId entityId, PosicionInicial posicionInicial, PosicionFinal posicionFinal){
         Objects.requireNonNull(entityId);
         Objects.requireNonNull(posicionInicial);
         Objects.requireNonNull(posicionFinal);
-        appendChange(new RutaActualizada(posicionInicial, posicionFinal)).apply();
+        appendChange(new RutaActualizada(entityId, posicionInicial, posicionFinal)).apply();
     }
 
     public void bajarPasajero(PasajeroId pasajeroId){
@@ -90,16 +100,12 @@ public class Bus extends AggregateEvent<BusId> {
         appendChange(new PasajeroBajado(pasajeroId)).apply();
     }
 
-    public void avanzarSiguienteEstacion(){
-
-    }
-
     public Optional<Conductor> buscarConductorPorId(ConductorId entityId){
         return conductores().stream().filter(funcion -> funcion.identity().equals(entityId)).findFirst();
     }
 
-    public Optional<Conductor> buscarRutaPorId(RutaId entityId){
-        return conductores().stream().filter(funcion -> funcion.identity().equals(entityId)).findFirst();
+    public Optional<Ruta> buscarRutaPorId(RutaId entityId){
+        return rutas().stream().filter(funcion -> funcion.identity().equals(entityId)).findFirst();
     }
 
     public Horario horario() {
@@ -129,4 +135,7 @@ public class Bus extends AggregateEvent<BusId> {
     public PasajeroId pasajeroId() {
         return pasajeroId;
     }
+
+
+
 }

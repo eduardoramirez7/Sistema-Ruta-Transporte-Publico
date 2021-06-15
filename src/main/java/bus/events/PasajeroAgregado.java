@@ -3,7 +3,6 @@ package bus.events;
 import co.com.sofka.domain.generic.DomainEvent;
 import pasajero.values.PasajeroId;
 
-import java.util.UUID;
 
 public class PasajeroAgregado extends DomainEvent {
 

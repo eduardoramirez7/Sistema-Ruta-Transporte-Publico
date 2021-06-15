@@ -11,4 +11,8 @@ public class TarifaActualizada extends DomainEvent {
         super("sofka.bus.tarifaactualizada");
         this.tarifa = tarifa;
     }
+
+    public Tarifa getTarifa() {
+        return tarifa;
+    }
 }
