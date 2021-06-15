@@ -100,11 +100,11 @@ public class Bus extends AggregateEvent<BusId> {
         appendChange(new PasajeroBajado(pasajeroId)).apply();
     }
 
-    public Optional<Conductor> buscarConductorPorId(ConductorId entityId){
+    protected Optional<Conductor> buscarConductorPorId(ConductorId entityId){
         return conductores().stream().filter(funcion -> funcion.identity().equals(entityId)).findFirst();
     }
 
-    public Optional<Ruta> buscarRutaPorId(RutaId entityId){
+    protected Optional<Ruta> buscarRutaPorId(RutaId entityId){
         return rutas().stream().filter(funcion -> funcion.identity().equals(entityId)).findFirst();
     }
 
